@@ -1,0 +1,1 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>404 · TEAMFLOW</title><link rel="stylesheet" href="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/assets/css/app.css"><body class="error-page"><h1>404</h1><h2>Page not found</h2><p>The page you requested does not exist.</p><a href="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/">Return to TEAMFLOW</a></body></html>
