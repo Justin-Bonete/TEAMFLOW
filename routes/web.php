@@ -32,7 +32,9 @@ $router->post('/tasks/status', [TasksController::class, 'status'], [AuthMiddlewa
 $router->post('/tasks/checklist/add', [TasksController::class, 'addChecklist'], [AuthMiddleware::class]);
 $router->post('/tasks/checklist/toggle', [TasksController::class, 'toggleChecklist'], [AuthMiddleware::class]);
 $router->get('/calendar', [CollaborationController::class, 'calendar'], [AuthMiddleware::class]);
+$router->get('/calendar/preview', [CollaborationController::class, 'calendarPreview'], [AuthMiddleware::class]);
 $router->get('/notifications', [CollaborationController::class, 'notifications'], [AuthMiddleware::class]);
+$router->get('/notifications/preview', [CollaborationController::class, 'notificationPreview'], [AuthMiddleware::class]);
 $router->post('/notifications/read', [CollaborationController::class, 'markRead'], [AuthMiddleware::class]);
 $router->post('/comments/create', [CollaborationController::class, 'comment'], [AuthMiddleware::class]);
 $router->post('/attachments/upload', [CollaborationController::class, 'upload'], [AuthMiddleware::class]);

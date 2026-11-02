@@ -10,35 +10,8 @@
     <link rel="stylesheet" href="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/assets/css/dashboard.css">
 </head>
 <body class="dashboard-page dark-dashboard">
-    <header class="app-topbar">
-        <a class="app-brand" href="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/dashboard">
-            <span class="brand-mark small">T</span><span>TEAMFLOW</span>
-        </a>
-        <div class="topbar-context"><span>Workspace</span><span aria-hidden="true">/</span><strong>Overview</strong></div>
-        <div class="topbar-actions">
-            <a class="topbar-icon" href="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/notifications" aria-label="Notifications">Notifications<?php if ($unreadCount): ?><span class="topbar-badge"><?= (int) $unreadCount ?></span><?php endif; ?></a>
-            <span class="topbar-user"><span class="avatar"><?= e(strtoupper(substr($name, 0, 1))) ?></span><span><?= e($name) ?></span></span>
-        </div>
-    </header>
-    <div class="dashboard-workspace">
-        <aside class="sidebar">
-            <p class="side-label">WORKSPACE</p>
-            <a class="side-link active" href="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/dashboard"><span class="nav-glyph" aria-hidden="true">▦</span>Dashboard</a>
-            <a class="side-link" href="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/projects"><span class="nav-glyph" aria-hidden="true">◇</span>Projects</a>
-            <a class="side-link" href="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/my-tasks"><span class="nav-glyph" aria-hidden="true">✓</span>My tasks</a>
-            <a class="side-link" href="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/calendar"><span class="nav-glyph" aria-hidden="true">▤</span>Calendar</a>
-            <a class="side-link" href="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/reports"><span class="nav-glyph" aria-hidden="true">▥</span>Reports</a>
-            <?php if ($canManageUsers): ?><a class="side-link" href="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/users"><span class="nav-glyph" aria-hidden="true">♧</span>People</a><?php endif; ?>
-            <?php if ($canManageRoles): ?><a class="side-link" href="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/roles"><span class="nav-glyph" aria-hidden="true">⚙</span>Roles & permissions</a><?php endif; ?>
-            <div class="sidebar-bottom">
-                <div class="sidebar-user"><span class="avatar"><?= e(strtoupper(substr($name, 0, 1))) ?></span><span><strong><?= e($name) ?></strong><small><?= e($role) ?></small></span></div>
-                <form method="post" action="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/logout">
-                    <input type="hidden" name="_csrf" value="<?= e(csrf_token()) ?>">
-                    <button class="logout-button" type="submit">Sign out</button>
-                </form>
-            </div>
-        </aside>
-        <main class="dashboard-main">
+    <?php $currentPage = 'dashboard'; require BASE_PATH . '/app/Views/layouts/workspace_start.php'; ?>
+    <main class="dashboard-main">
             <header class="dashboard-heading">
                 <div><p class="breadcrumb">Workspace <span>/</span> Dashboard</p><h1>Good to have you here, <?= e($name) ?>.</h1><p class="dashboard-subtitle">A clear view of your projects, tasks, and team activity.</p></div>
                 <a class="button-primary dashboard-primary-action" href="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/my-tasks">View my tasks <span>→</span></a>
@@ -154,7 +127,7 @@
 
             <section class="development-status"><span class="panel-kicker">DEVELOPMENT STATUS</span><strong>Phase 6 — Security and deployment</strong><span>Analytics and reporting are live. Production hardening and deployment readiness are underway.</span></section>
         </main>
-    </div>
     <script src="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/assets/js/kanban.js" defer></script>
+    <?php require BASE_PATH . '/app/Views/layouts/workspace_end.php'; ?>
 </body>
 </html>

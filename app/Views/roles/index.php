@@ -6,27 +6,10 @@
     <title>Roles and permissions · TEAMFLOW</title>
     <link rel="stylesheet" href="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/assets/css/app.css">
     <link rel="stylesheet" href="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/assets/css/dark-ui.css">
+    <link rel="stylesheet" href="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/assets/css/dashboard.css">
 </head>
-<body class="dashboard-page">
-    <aside class="sidebar">
-        <a class="sidebar-brand" href="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/dashboard"><span class="brand-mark small">T</span> TEAMFLOW</a>
-        <p class="side-label">WORKSPACE</p>
-        <a class="side-link" href="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/dashboard">Overview</a>
-        <a class="side-link" href="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/my-tasks">My tasks</a>
-        <a class="side-link" href="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/projects">Projects</a>
-        <a class="side-link" href="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/calendar">Calendar</a>
-        <a class="side-link" href="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/notifications">Notifications</a>
-        <a class="side-link" href="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/reports">Reports</a>
-        <?php if ($canManageUsers): ?><a class="side-link" href="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/users">People</a><?php endif; ?>
-        <a class="side-link active" href="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/roles">Roles & permissions</a>
-        <div class="sidebar-bottom">
-            <div class="user-chip"><span class="avatar"><?= e(strtoupper(substr($name, 0, 1))) ?></span><div><strong><?= e($name) ?></strong><small><?= e($role) ?></small></div></div>
-            <form method="post" action="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/logout">
-                <input type="hidden" name="_csrf" value="<?= e(csrf_token()) ?>">
-                <button class="logout-button" type="submit">Sign out</button>
-            </form>
-        </div>
-    </aside>
+<body class="dashboard-page dark-dashboard">
+    <?php $currentPage = 'roles'; require BASE_PATH . '/app/Views/layouts/workspace_start.php'; ?>
     <main class="dashboard-main">
         <header class="topbar">
             <div><span class="eyebrow">ADMINISTRATION</span><h1>Roles and permissions</h1></div>
@@ -110,5 +93,6 @@
             </div>
         </section>
     </main>
+    <?php require BASE_PATH . '/app/Views/layouts/workspace_end.php'; ?>
 </body>
 </html>

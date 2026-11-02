@@ -18,15 +18,12 @@ final class CollaborationController
     public function calendar(): void
     {
         $month = $_GET['month'] ?? date('Y-m');
-        if (!is_string($month) || !preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $month)) {
+        $firstDay = $this->firstDayOfMonth($month);
+        if (!$firstDay) {
             http_response_code(400);
             exit('Choose a valid calendar month.');
         }
-        $firstDay = \DateTimeImmutable::createFromFormat('!Y-m-d', $month . '-01');
-        if (!$firstDay || $firstDay->format('Y-m') !== $month) {
-            http_response_code(400);
-            exit('Choose a valid calendar month.');
-        }
+        $month = $firstDay->format('Y-m');
 
         $userId = (int) $_SESSION['user_id'];
         $userModel = new User();
@@ -72,6 +69,48 @@ final class CollaborationController
         $success = $_SESSION['flash_success'] ?? null;
         unset($_SESSION['flash_error'], $_SESSION['flash_success']);
         require BASE_PATH . '/app/Views/notifications/index.php';
+    }
+
+    public function notificationPreview(): void
+    {
+        $userId = (int) $_SESSION['user_id'];
+        $collaboration = new Collaboration();
+        $notifications = array_map(
+            static fn (array $notification): array => [
+                'title' => (string) $notification['title'],
+                'message' => (string) ($notification['message'] ?? ''),
+                'created_at' => (string) $notification['created_at'],
+                'read' => $notification['read_at'] !== null,
+                'project_id' => isset($notification['project_id']) ? (int) $notification['project_id'] : null,
+            ],
+            $collaboration->notifications($userId, 5)
+        );
+        $this->jsonResponse([
+            'unread_count' => $collaboration->unreadCount($userId),
+            'notifications' => $notifications,
+        ]);
+    }
+
+    public function calendarPreview(): void
+    {
+        $firstDay = $this->firstDayOfMonth($_GET['month'] ?? date('Y-m'));
+        if (!$firstDay) {
+            http_response_code(400);
+            $this->jsonResponse(['error' => 'Choose a valid calendar month.']);
+        }
+        $month = $firstDay->format('Y-m');
+        $events = array_map(
+            static fn (array $event): array => [
+                'project_id' => (int) $event['project_id'],
+                'task_id' => isset($event['task_id']) ? (int) $event['task_id'] : null,
+                'title' => (string) $event['title'],
+                'event_date' => (string) $event['event_date'],
+                'event_type' => (string) $event['event_type'],
+                'project_key' => (string) $event['project_key'],
+            ],
+            array_slice((new Collaboration())->calendarEvents((int) $_SESSION['user_id'], $month), 0, 6)
+        );
+        $this->jsonResponse(['month' => $month, 'events' => $events]);
     }
 
     public function comment(): void
@@ -273,6 +312,26 @@ final class CollaborationController
             $this->notFound();
         }
         return (int) $id;
+    }
+
+    private function firstDayOfMonth(mixed $month): ?\DateTimeImmutable
+    {
+        if (!is_string($month) || !preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $month)) {
+            return null;
+        }
+        $firstDay = \DateTimeImmutable::createFromFormat('!Y-m-d', $month . '-01');
+        return $firstDay && $firstDay->format('Y-m') === $month ? $firstDay : null;
+    }
+
+    private function jsonResponse(array $data): never
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        header('Cache-Control: private, no-store');
+        echo json_encode(
+            $data,
+            JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP
+        );
+        exit;
     }
 
     private function uploadErrorMessage(int $error): string

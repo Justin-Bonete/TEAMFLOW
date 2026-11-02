@@ -35,7 +35,6 @@ final class DashboardController
         unset($columnTasks);
         $collaboration = new Collaboration();
         $recentNotifications = $collaboration->notifications($userId, 4);
-        $unreadCount = $collaboration->unreadCount($userId);
         $canUpdateOwnTasks = $userModel->hasPermission($userId, 'tasks.update_own');
         require BASE_PATH . '/app/Views/dashboard/index.php';
     }
