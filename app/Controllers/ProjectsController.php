@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Models\Project;
+use App\Models\Collaboration;
 use App\Models\Task;
 use App\Models\User;
 
@@ -47,6 +48,7 @@ final class ProjectsController
             redirect('/projects');
         }
 
+        (new Collaboration())->projectUpdated($projectId, $userId, 'project.created', ['name' => $data['name']]);
         $_SESSION['flash_success'] = 'Project created.';
         redirect('/projects/view?project_id=' . $projectId);
     }
@@ -71,9 +73,14 @@ final class ProjectsController
             && $userModel->hasPermission($userId, 'tasks.assign');
         $canEditProject = $canManage && $userModel->hasPermission($userId, 'projects.manage');
         $isTaskMember = in_array($project['member_role'] ?? '', ['member', 'manager'], true);
+        $canCollaborate = $canManage || $isTaskMember;
         $members = $projectModel->members($projectId);
         $tasks = (new Task())->forProject($projectId);
         $checklists = (new Task())->checklistsForProject($projectId);
+        $collaboration = new Collaboration();
+        $comments = $collaboration->commentsForProject($projectId);
+        $attachments = $collaboration->attachmentsForProject($projectId);
+        $activities = $collaboration->activities($projectId);
         $availableMembers = $projectModel->activeUsers();
         $activeUsers = array_values(array_filter(
             $members,
@@ -106,6 +113,7 @@ final class ProjectsController
             redirect('/projects/view?project_id=' . $projectId);
         }
         $projectModel->update($projectId, $data);
+        (new Collaboration())->projectUpdated($projectId, $userId, 'project.updated', ['name' => $data['name']]);
         $_SESSION['flash_success'] = 'Project details updated.';
         redirect('/projects/view?project_id=' . $projectId);
     }
@@ -135,6 +143,7 @@ final class ProjectsController
             $_SESSION['flash_error'] = $error->getMessage();
             redirect('/projects/view?project_id=' . $projectId);
         }
+        (new Collaboration())->projectUpdated($projectId, $userId, 'project.members_updated', ['members' => count($members)]);
         $_SESSION['flash_success'] = 'Project membership updated.';
         redirect('/projects/view?project_id=' . $projectId);
     }

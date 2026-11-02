@@ -13,7 +13,8 @@
         <a class="side-link active" href="#">Overview</a>
         <a class="side-link" href="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/projects">Projects</a>
         <a class="side-link" href="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/my-tasks">My tasks</a>
-        <a class="side-link" href="#">Calendar <span class="soon">SOON</span></a>
+        <a class="side-link" href="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/calendar">Calendar</a>
+        <a class="side-link" href="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/notifications">Notifications</a>
         <?php if ($canManageUsers): ?><a class="side-link" href="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/users">People</a><?php endif; ?>
         <?php if ($canManageRoles): ?><a class="side-link" href="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/roles">Roles & permissions</a><?php endif; ?>
         <div class="sidebar-bottom">
@@ -33,7 +34,7 @@
             <article class="stat-card"><span>Completed tasks</span><strong><?= $taskStats['completed'] ?></strong><small>Assigned tasks marked done</small></article>
             <article class="stat-card"><span>Overdue tasks</span><strong><?= $taskStats['overdue'] ?></strong><small>Assigned tasks past due</small></article>
         </section>
-        <section class="panel development-status"><div><span class="eyebrow">DEVELOPMENT STATUS</span><h2>Phase 3 — Projects and task management</h2><p>Phases 1 and 2 are complete. Projects, team membership, task assignment, subtasks, priorities, deadlines, checklists, and task statuses are now available. Collaboration and reporting are next.</p></div><span class="status-tag">PHASE 3</span></section>
+        <section class="panel development-status"><div><span class="eyebrow">DEVELOPMENT STATUS</span><h2>Phase 4 — Collaboration</h2><p>Project and task management are live. Kanban boards, comments, private attachments, in-app notifications, deadlines calendar, and project activity history are now available. Analytics and reporting are next.</p></div><span class="status-tag">PHASE 4</span></section>
     </main>
 </body>
 </html>

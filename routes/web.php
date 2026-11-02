@@ -1,5 +1,6 @@
 <?php
 use App\Controllers\AuthController;
+use App\Controllers\CollaborationController;
 use App\Controllers\DashboardController;
 use App\Controllers\ProjectsController;
 use App\Controllers\RolesController;
@@ -27,6 +28,12 @@ $router->post('/tasks/update', [TasksController::class, 'update'], [AuthMiddlewa
 $router->post('/tasks/status', [TasksController::class, 'status'], [AuthMiddleware::class]);
 $router->post('/tasks/checklist/add', [TasksController::class, 'addChecklist'], [AuthMiddleware::class]);
 $router->post('/tasks/checklist/toggle', [TasksController::class, 'toggleChecklist'], [AuthMiddleware::class]);
+$router->get('/calendar', [CollaborationController::class, 'calendar'], [AuthMiddleware::class]);
+$router->get('/notifications', [CollaborationController::class, 'notifications'], [AuthMiddleware::class]);
+$router->post('/notifications/read', [CollaborationController::class, 'markRead'], [AuthMiddleware::class]);
+$router->post('/comments/create', [CollaborationController::class, 'comment'], [AuthMiddleware::class]);
+$router->post('/attachments/upload', [CollaborationController::class, 'upload'], [AuthMiddleware::class]);
+$router->get('/attachments/download', [CollaborationController::class, 'download'], [AuthMiddleware::class]);
 $router->get('/users', [UsersController::class, 'index'], [AuthMiddleware::class, UserManagementMiddleware::class]);
 $router->post('/users', [UsersController::class, 'create'], [AuthMiddleware::class, UserManagementMiddleware::class]);
 $router->post('/users/update', [UsersController::class, 'update'], [AuthMiddleware::class, UserManagementMiddleware::class]);

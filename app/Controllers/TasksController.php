@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Models\Project;
+use App\Models\Collaboration;
 use App\Models\Task;
 use App\Models\User;
 
@@ -38,11 +39,12 @@ final class TasksController
             redirect('/projects/view?project_id=' . $projectId);
         }
         try {
-            (new Task())->create($projectId, $userId, $data);
+            $taskId = (new Task())->create($projectId, $userId, $data);
         } catch (\RuntimeException $error) {
             $_SESSION['flash_error'] = $error->getMessage();
             redirect('/projects/view?project_id=' . $projectId);
         }
+        (new CollaborationController())->logTaskChange($taskId, $projectId, $userId, 'created', $data['title']);
         $_SESSION['flash_success'] = 'Task created.';
         redirect('/projects/view?project_id=' . $projectId);
     }
@@ -66,11 +68,22 @@ final class TasksController
         if ($data === null) {
             redirect('/projects/view?project_id=' . $projectId);
         }
+        $previousStatus = $task['status'];
         try {
             $taskModel->update($taskId, $userId, $data);
         } catch (\RuntimeException $error) {
             $_SESSION['flash_error'] = $error->getMessage();
             redirect('/projects/view?project_id=' . $projectId);
+        }
+        (new CollaborationController())->logTaskChange(
+            $taskId,
+            $projectId,
+            $userId,
+            'updated',
+            $data['title']
+        );
+        if ($previousStatus !== $data['status']) {
+            (new CollaborationController())->logTaskChange($taskId, $projectId, $userId, 'status', $data['status']);
         }
         $_SESSION['flash_success'] = 'Task updated.';
         redirect('/projects/view?project_id=' . $projectId);
@@ -101,7 +114,10 @@ final class TasksController
             $this->deny();
         }
 
-        $taskModel->updateStatus($taskId, $status);
+        if ($task['status'] !== $status) {
+            $taskModel->updateStatus($taskId, $status);
+            (new CollaborationController())->logTaskChange($taskId, $projectId, $userId, 'status', $status);
+        }
         $_SESSION['flash_success'] = 'Task status updated.';
         redirect('/projects/view?project_id=' . $projectId);
     }
@@ -131,6 +147,7 @@ final class TasksController
             redirect('/projects/view?project_id=' . $projectId);
         }
         $taskModel->addChecklistItem($taskId, trim($title));
+        (new Collaboration())->checklistChanged($taskId, $projectId, $userId, 'checklist.item_added', trim($title));
         $_SESSION['flash_success'] = 'Checklist item added.';
         redirect('/projects/view?project_id=' . $projectId);
     }
@@ -166,6 +183,13 @@ final class TasksController
         }
         $completed = $completedInput === '1';
         $taskModel->toggleChecklist($itemId, $userId, $completed);
+        (new Collaboration())->checklistChanged(
+            $taskId,
+            $projectId,
+            $userId,
+            $completed ? 'checklist.item_completed' : 'checklist.item_reopened',
+            (string) $itemId
+        );
         redirect('/projects/view?project_id=' . $projectId);
     }
 
