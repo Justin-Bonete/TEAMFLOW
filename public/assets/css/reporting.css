@@ -1,0 +1,157 @@
+.report-export {
+    flex-shrink: 0;
+}
+
+.report-scope {
+    margin: -12px 0 16px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.report-stats .stat-card > strong small {
+    display: inline;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.report-section {
+    margin-top: 30px;
+}
+
+.report-section .section-heading h2 {
+    margin: 8px 0 0;
+}
+
+.report-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: white;
+}
+
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 12px;
+}
+
+.report-table th,
+.report-table td {
+    padding: 13px 15px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.report-table th {
+    background: #f8f9fc;
+    color: #68758a;
+    font-size: 10px;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+}
+
+.report-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.report-table td:first-child {
+    min-width: 190px;
+}
+
+.report-table td:first-child a {
+    display: grid;
+    gap: 4px;
+    color: var(--ink);
+}
+
+.report-table td:first-child small,
+.progress-label small {
+    color: var(--muted);
+    font-size: 10px;
+}
+
+.progress-cell {
+    min-width: 190px;
+}
+
+.progress-label {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.progress-track {
+    display: block;
+    width: 100%;
+    height: 7px;
+    overflow: hidden;
+    border-radius: 8px;
+    background: #edf0f5;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.progress-track::-webkit-progress-bar {
+    border-radius: inherit;
+    background: #edf0f5;
+}
+
+.progress-track::-webkit-progress-value {
+    border-radius: inherit;
+    background: linear-gradient(90deg, #829cff, #75c4a8);
+}
+
+.progress-track::-moz-progress-bar {
+    border-radius: inherit;
+    background: linear-gradient(90deg, #829cff, #75c4a8);
+}
+
+.report-status {
+    display: inline-block;
+    padding: 5px 8px;
+    border-radius: 20px;
+    background: #edf1f8;
+    color: #58667d;
+    font-size: 10px;
+    text-transform: capitalize;
+}
+
+.report-status.status-active {
+    background: #e8f7f0;
+    color: #34775f;
+}
+
+.report-status.status-completed {
+    background: #e9eefb;
+    color: #526caa;
+}
+
+.report-status.status-on_hold {
+    background: #fff3dc;
+    color: #8a682b;
+}
+
+.team-report-table td:first-child {
+    min-width: 160px;
+}
+
+@media (max-width: 700px) {
+    .report-export {
+        max-width: 150px;
+        text-align: center;
+        white-space: normal;
+    }
+
+    .report-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .report-table th,
+    .report-table td {
+        padding: 10px;
+    }
+}

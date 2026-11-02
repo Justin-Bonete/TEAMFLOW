@@ -113,7 +113,7 @@ final class Task
     public function assignedToUser(int $userId): array
     {
         $stmt = Database::connection()->prepare(
-            'SELECT t.*, p.project_key, p.name AS project_name,
+            'SELECT t.*, p.project_key, p.name AS project_name, p.status AS project_status,
                 (SELECT COUNT(*) FROM task_checklists c WHERE c.task_id = t.id) AS checklist_count,
                 (SELECT COUNT(*) FROM task_checklists c WHERE c.task_id = t.id AND c.is_completed = 1) AS checklist_done
              FROM task_assignments ta

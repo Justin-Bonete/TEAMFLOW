@@ -35,6 +35,7 @@ final class AuthController
         }
 
         session_regenerate_id(true);
+        $_SESSION['_csrf'] = bin2hex(random_bytes(32));
         $_SESSION['user_id'] = (int) $user['id'];
         $_SESSION['role'] = $user['role_name'];
         $_SESSION['user_name'] = $user['first_name'] . ' ' . $user['last_name'];

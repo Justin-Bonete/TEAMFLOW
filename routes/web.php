@@ -3,6 +3,7 @@ use App\Controllers\AuthController;
 use App\Controllers\CollaborationController;
 use App\Controllers\DashboardController;
 use App\Controllers\ProjectsController;
+use App\Controllers\ReportsController;
 use App\Controllers\RolesController;
 use App\Controllers\SetupController;
 use App\Controllers\TasksController;
@@ -17,6 +18,8 @@ $router->post('/login', [AuthController::class, 'login']);
 $router->post('/logout', [AuthController::class, 'logout'], [AuthMiddleware::class]);
 
 $router->get('/dashboard', [DashboardController::class, 'index'], [AuthMiddleware::class]);
+$router->get('/reports', [ReportsController::class, 'index'], [AuthMiddleware::class]);
+$router->get('/reports/export', [ReportsController::class, 'export'], [AuthMiddleware::class]);
 $router->get('/projects', [ProjectsController::class, 'index'], [AuthMiddleware::class]);
 $router->post('/projects/create', [ProjectsController::class, 'create'], [AuthMiddleware::class]);
 $router->get('/projects/view', [ProjectsController::class, 'view'], [AuthMiddleware::class]);

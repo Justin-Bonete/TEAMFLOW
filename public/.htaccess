@@ -1,6 +1,10 @@
-Options -Indexes
+Options -Indexes -MultiViews
 RewriteEngine On
 RewriteBase /TEAMFLOW_starter_v1/TEAMFLOW/public/
+
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
 
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d

@@ -1,0 +1,251 @@
+:root {
+    --navy: #101725;
+    --navy2: #141d2e;
+    --ink: #e8ecf5;
+    --muted: #929cb0;
+    --line: #ffffff16;
+    --paper: #090c14;
+    --white: #111724;
+    --accent: #829cff;
+    --mint: #65cfbf;
+}
+
+.dashboard-page {
+    color: var(--ink);
+    background:
+        radial-gradient(ellipse at 82% 12%, #31416c38 0, transparent 37%),
+        radial-gradient(ellipse at 45% 88%, #16264a30 0, transparent 42%),
+        #090c14;
+}
+
+.dashboard-page .sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    border-right: 1px solid var(--line);
+    background: linear-gradient(180deg, #0d111bfa, #0a0e17fa);
+}
+
+.dashboard-page .sidebar-brand {
+    color: var(--ink);
+}
+
+.dashboard-page .side-link {
+    color: #a7b0c2;
+}
+
+.dashboard-page .side-link:hover,
+.dashboard-page .side-link.active {
+    border: 1px solid #879eff35;
+    background: linear-gradient(110deg, #7695ff28, #ffffff08);
+    color: #eef2ff;
+}
+
+.dashboard-page .user-chip,
+.dashboard-page .sidebar-user {
+    border-color: var(--line);
+}
+
+.dashboard-page .logout-button {
+    border-color: #ffffff20;
+    color: #c1c9d8;
+}
+
+.dashboard-page .avatar {
+    background: linear-gradient(145deg, #d6e0ff, #819cff);
+    color: #13213b;
+}
+
+.dashboard-page .dashboard-main {
+    color: var(--ink);
+}
+
+.dashboard-page .eyebrow,
+.dashboard-page .panel-kicker,
+.dashboard-page .side-label {
+    color: #8492ad;
+}
+
+.dashboard-page .role-pill,
+.dashboard-page .status-tag {
+    border: 1px solid var(--line);
+    background: #182237;
+    color: #c4d0f4;
+}
+
+.dashboard-page .panel,
+.dashboard-page .stat-card,
+.dashboard-page .report-table-wrap,
+.dashboard-page .kanban-column,
+.dashboard-page .kanban-card,
+.dashboard-page .comment-item,
+.dashboard-page .calendar-day,
+.dashboard-page .member-list {
+    border-color: var(--line);
+    background: #111724eF;
+    color: var(--ink);
+    box-shadow: 0 14px 40px #00000020;
+}
+
+.dashboard-page .kanban-column,
+.dashboard-page .calendar-day-outside {
+    background: #0e1420;
+}
+
+.dashboard-page .kanban-column-dragover {
+    border-color: #829cff;
+    background: #19233a;
+}
+
+.dashboard-page .kanban-card > a,
+.dashboard-page .report-table td:first-child a {
+    color: #e5eafa;
+}
+
+.dashboard-page .report-table th {
+    border-color: var(--line);
+    background: #171f2e;
+    color: #aab4c7;
+}
+
+.dashboard-page .report-table td {
+    border-color: var(--line);
+    color: #d3d9e7;
+}
+
+.dashboard-page .progress-track::-webkit-progress-bar {
+    background: #ffffff14;
+}
+
+.dashboard-page .report-status {
+    background: #202a3c;
+    color: #cbd4e4;
+}
+
+.dashboard-page .report-status.status-active {
+    background: #12362f;
+    color: #87ddc2;
+}
+
+.dashboard-page .report-status.status-completed {
+    background: #202c4d;
+    color: #b6c8ff;
+}
+
+.dashboard-page .report-status.status-on_hold {
+    background: #3a3020;
+    color: #e9c57c;
+}
+
+.dashboard-page input:not([type="checkbox"]):not([type="radio"]),
+.dashboard-page select,
+.dashboard-page textarea {
+    border-color: #ffffff20;
+    background-color: #0c111b;
+    color: #e8ecf5;
+}
+
+.dashboard-page input::placeholder,
+.dashboard-page textarea::placeholder {
+    color: #77839a;
+}
+
+.dashboard-page .button-secondary {
+    border-color: #ffffff24;
+    background: #182133;
+    color: #d6def0;
+}
+
+.dashboard-page .button-secondary:hover {
+    border-color: #829cff88;
+    background: #202d47;
+}
+
+.dashboard-page .button-primary {
+    background: linear-gradient(110deg, #7696ff, #619fc9);
+    color: #09111f;
+}
+
+.dashboard-page .button-primary:hover {
+    background: linear-gradient(110deg, #92aaff, #77b9df);
+}
+
+.dashboard-page .success-message {
+    border-color: #65cfbf35;
+    background: #10332d;
+    color: #9ce5d2;
+}
+
+.dashboard-page .alert {
+    border-color: #ff887b40;
+    background: #351c23;
+    color: #ffb6ab;
+}
+
+.dashboard-page .empty-state,
+.dashboard-page .form-hint,
+.dashboard-page .task-card p,
+.dashboard-page .panel p {
+    color: #a4aec0;
+}
+
+.dashboard-page .calendar-weekday {
+    border-color: var(--line);
+    background: #151d2b;
+    color: #aab4c7;
+}
+
+.dashboard-page .calendar-event {
+    background: #212b48;
+    color: #c6d2ff;
+}
+
+.dashboard-page .calendar-event-task {
+    background: #15362f;
+    color: #9ce5d2;
+}
+
+.dashboard-page .task-priority {
+    border-color: #ffffff18;
+}
+
+.dashboard-page .priority-low {
+    background: #172f2b;
+    color: #8bd8c3;
+}
+
+.dashboard-page .priority-medium {
+    background: #1c2b49;
+    color: #aac0ff;
+}
+
+.dashboard-page .priority-high,
+.dashboard-page .priority-urgent {
+    background: #3b2529;
+    color: #ffaaa1;
+}
+
+.dashboard-page .task-status-badge {
+    background: #1c2638;
+    color: #cbd4e4;
+}
+
+.dashboard-page .notification-unread {
+    border-left-color: #829cff;
+}
+
+.dashboard-page .notification-read {
+    background: #0f1520;
+}
+
+.dashboard-page .activity-item {
+    border-color: var(--line);
+    color: #cbd4e4;
+}
+
+@media (max-width: 800px) {
+    .dashboard-page .sidebar {
+        height: 100vh;
+    }
+}

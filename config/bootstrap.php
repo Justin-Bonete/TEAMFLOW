@@ -8,6 +8,9 @@ Env::load(BASE_PATH . '/.env');
 date_default_timezone_set($_ENV['APP_TIMEZONE'] ?? 'Asia/Manila');
 
 $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
+ini_set('session.use_strict_mode', '1');
+ini_set('session.use_only_cookies', '1');
+ini_set('session.cookie_httponly', '1');
 session_name('TEAMFLOW_SESSION');
 session_set_cookie_params([
     'lifetime' => 0,
@@ -16,6 +19,17 @@ session_set_cookie_params([
     'httponly' => true,
     'samesite' => 'Lax',
 ]);
+
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: DENY');
+header('Referrer-Policy: strict-origin-when-cross-origin');
+header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
+header(
+    "Content-Security-Policy: default-src 'self'; base-uri 'self'; form-action 'self'; "
+    . "frame-ancestors 'none'; object-src 'none'; img-src 'self' data:; "
+    .     "style-src 'self'; script-src 'self'; font-src 'self' data:; connect-src 'self'"
+);
+
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
