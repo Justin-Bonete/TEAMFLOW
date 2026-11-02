@@ -119,7 +119,7 @@ final class TasksController
             (new CollaborationController())->logTaskChange($taskId, $projectId, $userId, 'status', $status);
         }
         $_SESSION['flash_success'] = 'Task status updated.';
-        redirect('/projects/view?project_id=' . $projectId);
+        redirect('/projects/view?project_id=' . $projectId . '#task-' . $taskId);
     }
 
     public function addChecklist(): void

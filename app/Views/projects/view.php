@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= e($project['name']) ?> · TEAMFLOW</title>
     <link rel="stylesheet" href="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/assets/css/app.css">
+    <link rel="stylesheet" href="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/assets/css/collaboration.css">
 </head>
 <body class="dashboard-page">
     <aside class="sidebar">
@@ -103,13 +104,45 @@
                     </form>
                 </details>
             <?php endif; ?>
+            <?php if ($boardTasks): ?>
+                <section class="kanban-section" aria-label="Task Kanban board">
+                    <div class="section-heading"><div><span class="eyebrow">WORKFLOW</span><h3>Kanban board</h3></div><span class="muted">Drag a card to change its status, or use its status control.</span></div>
+                    <div class="kanban-board" data-kanban-board>
+                        <?php foreach ($taskStatuses as $boardStatus): ?>
+                            <?php $columnTasks = array_filter($boardTasks, static fn (array $boardTask): bool => $boardTask['status'] === $boardStatus); ?>
+                            <section class="kanban-column" data-kanban-column="<?= e($boardStatus) ?>">
+                                <h4><?= e(str_replace('_', ' ', ucfirst($boardStatus))) ?><span><?= count($columnTasks) ?></span></h4>
+                                <div class="kanban-cards">
+                                    <?php foreach ($columnTasks as $boardTask): ?>
+                                        <?php $boardAssigned = in_array((string) $userId, explode(',', (string) $boardTask['assignee_ids']), true); $canChangeBoardStatus = $projectOpen && ($canManage || ($canUpdateOwnTasks && $boardAssigned)); ?>
+                                        <article class="kanban-card" data-kanban-card="<?= (int) $boardTask['id'] ?>" draggable="<?= $canChangeBoardStatus ? 'true' : 'false' ?>">
+                                            <a href="#task-<?= (int) $boardTask['id'] ?>"><?= e($boardTask['title']) ?></a>
+                                            <span class="task-priority priority-<?= e($boardTask['priority']) ?>"><?= e(ucfirst($boardTask['priority'])) ?></span>
+                                            <?php if ($boardTask['due_date']): ?><small>Due <?= e(date('M j', strtotime($boardTask['due_date']))) ?></small><?php endif; ?>
+                                            <?php if ($canChangeBoardStatus): ?>
+                                                <form method="post" action="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/tasks/status" class="kanban-status-form" data-kanban-status-form>
+                                                    <input type="hidden" name="_csrf" value="<?= e(csrf_token()) ?>">
+                                                    <input type="hidden" name="task_id" value="<?= (int) $boardTask['id'] ?>">
+                                                    <label class="sr-only" for="kanban-status-<?= (int) $boardTask['id'] ?>">Change task status</label>
+                                                    <select id="kanban-status-<?= (int) $boardTask['id'] ?>" name="status"><?php foreach ($taskStatuses as $status): ?><option value="<?= e($status) ?>" <?= $boardTask['status'] === $status ? 'selected' : '' ?>><?= e(str_replace('_', ' ', ucfirst($status))) ?></option><?php endforeach; ?></select>
+                                                    <button class="button-secondary" type="submit">Save</button>
+                                                </form>
+                                            <?php endif; ?>
+                                        </article>
+                                    <?php endforeach; ?>
+                                </div>
+                            </section>
+                        <?php endforeach; ?>
+                    </div>
+                </section>
+            <?php endif; ?>
             <?php if (!$tasks): ?>
                 <div class="panel empty-state">No tasks yet<?= $canCreateTasks ? '. Create the first task above.' : '.' ?></div>
             <?php else: ?>
                 <div class="task-list">
                     <?php foreach ($tasks as $task): ?>
                         <?php $taskChecklist = $checklists[(int) $task['id']] ?? []; $taskAssigned = in_array((string) $_SESSION['user_id'], explode(',', (string) $task['assignee_ids']), true); ?>
-                        <article class="panel task-card">
+                        <article class="panel task-card" id="task-<?= (int) $task['id'] ?>">
                             <div class="task-card-heading">
                                 <div><span class="task-priority priority-<?= e($task['priority']) ?>"><?= e(ucfirst($task['priority'])) ?> priority</span><h3><?= e($task['title']) ?></h3><p><?= e($task['description'] ?: 'No task description.') ?></p></div>
                                 <?php if ($task['due_date']): ?><span class="task-due">Due <?= e(date('M j', strtotime($task['due_date']))) ?></span><?php endif; ?>
@@ -152,9 +185,10 @@
                                     <?php endif; ?>
                                 </div>
                             <?php endif; ?>
+                            <?php $collaborationTaskId = (int) $task['id']; require BASE_PATH . '/app/Views/projects/_task_collaboration.php'; ?>
                             <?php foreach ($task['subtasks'] as $subtask): ?>
                                 <?php $subtaskChecklist = $checklists[(int) $subtask['id']] ?? []; $subtaskAssigned = in_array((string) $_SESSION['user_id'], explode(',', (string) $subtask['assignee_ids']), true); ?>
-                                <div class="subtask-card">
+                                <div class="subtask-card" id="task-<?= (int) $subtask['id'] ?>">
                                     <div><span class="subtask-label">SUBTASK</span><strong><?= e($subtask['title']) ?></strong><small><?= e($subtask['assignees'] ?: 'Unassigned') ?></small></div>
                                     <?php if ($canManage || $subtaskAssigned): ?>
                                         <form method="post" action="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/tasks/status" class="task-status-form">
@@ -174,6 +208,7 @@
                                                     <input type="hidden" name="_csrf" value="<?= e(csrf_token()) ?>"><input type="hidden" name="task_id" value="<?= (int) $subtask['id'] ?>"><input name="title" maxlength="220" placeholder="Add checklist item" required><button class="button-secondary" type="submit">Add</button>
                                                 </form>
                                             <?php endif; ?>
+                                            <?php $collaborationTaskId = (int) $subtask['id']; require BASE_PATH . '/app/Views/projects/_task_collaboration.php'; ?>
                                         </div>
                                     <?php endif; ?>
                                 </div>
@@ -183,6 +218,26 @@
                 </div>
             <?php endif; ?>
         </section>
+        <section class="activity-section">
+            <div class="section-heading"><div><span class="eyebrow">PROJECT HISTORY</span><h2>Recent activity</h2></div></div>
+            <?php if (!$activities): ?>
+                <div class="panel empty-state">Project updates, task changes, comments, and checklist activity will appear here.</div>
+            <?php else: ?>
+                <ol class="activity-list">
+                    <?php foreach ($activities as $activity): ?>
+                        <?php $activityDetails = json_decode((string) ($activity['details'] ?? ''), true); ?>
+                        <li class="activity-item">
+                            <span class="activity-dot" aria-hidden="true"></span>
+                            <div><strong><?= e($activity['actor_name'] ?? 'Former user') ?></strong> <span><?= e(str_replace(['.', '_'], ' ', $activity['action'])) ?></span>
+                                <?php if (is_array($activityDetails) && isset($activityDetails['title']) && is_string($activityDetails['title'])): ?><span> · <?= e($activityDetails['title']) ?></span><?php elseif (is_array($activityDetails) && isset($activityDetails['status']) && is_string($activityDetails['status'])): ?><span> · <?= e(str_replace('_', ' ', $activityDetails['status'])) ?></span><?php endif; ?>
+                                <time datetime="<?= e($activity['created_at']) ?>"><?= e(date('M j, Y · g:i a', strtotime($activity['created_at']))) ?></time>
+                            </div>
+                        </li>
+                    <?php endforeach; ?>
+                </ol>
+            <?php endif; ?>
+        </section>
     </main>
+    <script src="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/assets/js/kanban.js" defer></script>
 </body>
 </html>

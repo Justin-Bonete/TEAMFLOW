@@ -72,10 +72,20 @@ final class ProjectsController
             && $userModel->hasPermission($userId, 'tasks.create')
             && $userModel->hasPermission($userId, 'tasks.assign');
         $canEditProject = $canManage && $userModel->hasPermission($userId, 'projects.manage');
+        $canUpdateOwnTasks = $userModel->hasPermission($userId, 'tasks.update_own');
         $isTaskMember = in_array($project['member_role'] ?? '', ['member', 'manager'], true);
         $canCollaborate = $canManage || $isTaskMember;
         $members = $projectModel->members($projectId);
         $tasks = (new Task())->forProject($projectId);
+        $boardTasks = [];
+        foreach ($tasks as $task) {
+            $boardTasks[] = $task;
+            foreach ($task['subtasks'] as $subtask) {
+                $boardTasks[] = $subtask;
+            }
+        }
+        $taskStatuses = Task::STATUSES;
+        $projectOpen = !in_array($project['status'], ['completed', 'archived'], true);
         $checklists = (new Task())->checklistsForProject($projectId);
         $collaboration = new Collaboration();
         $comments = $collaboration->commentsForProject($projectId);
@@ -113,7 +123,12 @@ final class ProjectsController
             redirect('/projects/view?project_id=' . $projectId);
         }
         $projectModel->update($projectId, $data);
-        (new Collaboration())->projectUpdated($projectId, $userId, 'project.updated', ['name' => $data['name']]);
+        (new Collaboration())->projectUpdated(
+            $projectId,
+            $userId,
+            'project.updated',
+            ['name' => $data['name'], 'status' => $data['status']]
+        );
         $_SESSION['flash_success'] = 'Project details updated.';
         redirect('/projects/view?project_id=' . $projectId);
     }

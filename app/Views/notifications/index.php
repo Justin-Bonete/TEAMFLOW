@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Notifications · TEAMFLOW</title>
     <link rel="stylesheet" href="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/assets/css/app.css">
+    <link rel="stylesheet" href="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/assets/css/collaboration.css">
 </head>
 <body class="dashboard-page">
     <aside class="sidebar">
@@ -31,6 +32,7 @@
             <span class="role-pill"><?= $unreadCount ?> unread</span>
         </header>
         <?php if ($error): ?><div class="alert" role="alert"><?= e($error) ?></div><?php endif; ?>
+        <?php if ($success): ?><div class="success-message" role="status"><?= e($success) ?></div><?php endif; ?>
         <?php if ($unreadCount): ?>
             <form method="post" action="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/notifications/read" class="mark-all-form">
                 <input type="hidden" name="_csrf" value="<?= e(csrf_token()) ?>"><input type="hidden" name="mark_all" value="1">

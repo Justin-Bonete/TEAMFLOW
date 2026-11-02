@@ -68,6 +68,9 @@ final class CollaborationController
         $canManageRoles = $userModel->hasPermission($userId, 'roles.manage') && $userModel->isAdministrator($userId);
         $name = $_SESSION['user_name'] ?? 'Team member';
         $role = $_SESSION['role'] ?? 'User';
+        $error = $_SESSION['flash_error'] ?? null;
+        $success = $_SESSION['flash_success'] ?? null;
+        unset($_SESSION['flash_error'], $_SESSION['flash_success']);
         require BASE_PATH . '/app/Views/notifications/index.php';
     }
 
@@ -83,6 +86,10 @@ final class CollaborationController
         $projectId = (int) $task['project_id'];
         $project = $this->requireProject($projectId, $userId);
         $this->requireContributor($project, $userId);
+        if (in_array($project['status'], ['completed', 'archived'], true)) {
+            $_SESSION['flash_error'] = 'Comments cannot be added to a closed project.';
+            redirect('/projects/view?project_id=' . $projectId . '#task-' . $taskId);
+        }
 
         $body = $_POST['body'] ?? null;
         if (!is_string($body) || trim($body) === '' || strlen(trim($body)) > 5000) {
@@ -208,10 +215,13 @@ final class CollaborationController
         $collaboration = new Collaboration();
         if (isset($_POST['mark_all']) && $_POST['mark_all'] === '1') {
             $collaboration->markAllNotificationsRead($userId);
+            $_SESSION['flash_success'] = 'All notifications marked as read.';
         } else {
             $notificationId = $this->positiveId($_POST['notification_id'] ?? null);
             if (!$collaboration->markNotificationRead($notificationId, $userId)) {
                 $_SESSION['flash_error'] = 'Notification not found or already read.';
+            } else {
+                $_SESSION['flash_success'] = 'Notification marked as read.';
             }
         }
         redirect('/notifications');

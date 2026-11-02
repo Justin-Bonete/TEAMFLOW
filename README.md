@@ -29,6 +29,9 @@ Sign in as an administrator and open **People** in the workspace sidebar (or `/u
 ## Project and task management
 Open **Projects** from the workspace sidebar to create and view projects. Project owners and assigned project managers can update project details and membership, create and assign tasks, add subtasks, set priorities and dates, and manage checklists. Members can update the status and checklist of tasks assigned to them. Project access is limited to project members and administrators; project and task operations also enforce role permissions. The dashboard shows live counts for active projects and assigned, completed, and overdue tasks, along with the current development phase.
 
+## Collaboration
+Project pages include a Kanban board with drag-and-drop and status-control alternatives, task comments, private attachments, and recent activity. Project members can view a monthly calendar of project and task deadlines and manage their in-app notifications. Attachments are limited to 10 MB and PDF, JPEG, PNG, GIF, WebP, plain text, or CSV; downloads require project access. Keep `storage/` outside the public web root in production and retain the upload access-control file when deploying.
+
 ## Architecture
 - `app/Controllers` — HTTP request handling
 - `app/Models` — database access
