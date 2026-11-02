@@ -1,8 +1,14 @@
 <?php
 use App\Controllers\AuthController;
 use App\Controllers\DashboardController;
+use App\Controllers\ProjectsController;
+use App\Controllers\RolesController;
 use App\Controllers\SetupController;
+use App\Controllers\TasksController;
+use App\Controllers\UsersController;
 use App\Middleware\AuthMiddleware;
+use App\Middleware\RoleManagementMiddleware;
+use App\Middleware\UserManagementMiddleware;
 
 $router->get('/', [AuthController::class, 'showLogin']);
 $router->get('/login', [AuthController::class, 'showLogin']);
@@ -10,5 +16,22 @@ $router->post('/login', [AuthController::class, 'login']);
 $router->post('/logout', [AuthController::class, 'logout'], [AuthMiddleware::class]);
 
 $router->get('/dashboard', [DashboardController::class, 'index'], [AuthMiddleware::class]);
+$router->get('/projects', [ProjectsController::class, 'index'], [AuthMiddleware::class]);
+$router->post('/projects/create', [ProjectsController::class, 'create'], [AuthMiddleware::class]);
+$router->get('/projects/view', [ProjectsController::class, 'view'], [AuthMiddleware::class]);
+$router->post('/projects/update', [ProjectsController::class, 'update'], [AuthMiddleware::class]);
+$router->post('/projects/members', [ProjectsController::class, 'members'], [AuthMiddleware::class]);
+$router->get('/my-tasks', [TasksController::class, 'mine'], [AuthMiddleware::class]);
+$router->post('/tasks/create', [TasksController::class, 'create'], [AuthMiddleware::class]);
+$router->post('/tasks/update', [TasksController::class, 'update'], [AuthMiddleware::class]);
+$router->post('/tasks/status', [TasksController::class, 'status'], [AuthMiddleware::class]);
+$router->post('/tasks/checklist/add', [TasksController::class, 'addChecklist'], [AuthMiddleware::class]);
+$router->post('/tasks/checklist/toggle', [TasksController::class, 'toggleChecklist'], [AuthMiddleware::class]);
+$router->get('/users', [UsersController::class, 'index'], [AuthMiddleware::class, UserManagementMiddleware::class]);
+$router->post('/users', [UsersController::class, 'create'], [AuthMiddleware::class, UserManagementMiddleware::class]);
+$router->post('/users/update', [UsersController::class, 'update'], [AuthMiddleware::class, UserManagementMiddleware::class]);
+$router->get('/roles', [RolesController::class, 'index'], [AuthMiddleware::class, RoleManagementMiddleware::class]);
+$router->post('/roles', [RolesController::class, 'create'], [AuthMiddleware::class, RoleManagementMiddleware::class]);
+$router->post('/roles/update', [RolesController::class, 'update'], [AuthMiddleware::class, RoleManagementMiddleware::class]);
 $router->get('/setup-admin', [SetupController::class, 'show']);
 $router->post('/setup-admin', [SetupController::class, 'create']);
