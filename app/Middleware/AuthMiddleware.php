@@ -16,12 +16,22 @@ final class AuthMiddleware
             redirect('/login');
         }
 
-        if (!(new User())->isActive($userId)) {
-            unset($_SESSION['user_id'], $_SESSION['role'], $_SESSION['user_name']);
+        $profile = (new User())->activeWorkspaceProfile($userId);
+        if (!$profile) {
+            unset(
+                $_SESSION['user_id'],
+                $_SESSION['role'],
+                $_SESSION['user_name'],
+                $_SESSION['has_profile_avatar'],
+                $_SESSION['profile_avatar_version']
+            );
             session_regenerate_id(true);
             $_SESSION['_csrf'] = bin2hex(random_bytes(32));
             $_SESSION['flash_error'] = 'Your account is inactive. Contact an administrator for access.';
             redirect('/login');
         }
+        $_SESSION['user_name'] = $profile['first_name'] . ' ' . $profile['last_name'];
+        $_SESSION['has_profile_avatar'] = (bool) $profile['has_profile_avatar'];
+        $_SESSION['profile_avatar_version'] = strtotime($profile['updated_at']) ?: 0;
     }
 }

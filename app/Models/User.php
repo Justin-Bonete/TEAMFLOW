@@ -60,6 +60,200 @@ final class User
         return (bool) $stmt->fetchColumn();
     }
 
+    public function activeWorkspaceProfile(int $userId): ?array
+    {
+        $stmt = Database::connection()->prepare(
+            'SELECT first_name, last_name, email, updated_at,
+                    CASE
+                        WHEN avatar_source = \'upload\' AND profile_image_path IS NOT NULL THEN 1
+                        WHEN avatar_source = \'github\' AND github_avatar_path IS NOT NULL THEN 1
+                        ELSE 0
+                    END AS has_profile_avatar
+             FROM users WHERE id = :user_id AND status = \'active\' LIMIT 1'
+        );
+        $stmt->execute(['user_id' => $userId]);
+        return $stmt->fetch() ?: null;
+    }
+
+    public function profileForSettings(int $userId): ?array
+    {
+        $stmt = Database::connection()->prepare(
+            'SELECT first_name, last_name, email, password_hash, avatar_source,
+                    profile_image_path, github_id, github_login, github_avatar_path
+             FROM users WHERE id = :user_id LIMIT 1'
+        );
+        $stmt->execute(['user_id' => $userId]);
+        return $stmt->fetch() ?: null;
+    }
+
+    public function profileAvatarPath(int $userId): ?string
+    {
+        $stmt = Database::connection()->prepare(
+            'SELECT CASE avatar_source
+                        WHEN \'upload\' THEN profile_image_path
+                        WHEN \'github\' THEN github_avatar_path
+                        ELSE NULL
+                    END
+             FROM users WHERE id = :user_id AND status = \'active\' LIMIT 1'
+        );
+        $stmt->execute(['user_id' => $userId]);
+        $path = $stmt->fetchColumn();
+        return is_string($path) && $path !== '' ? $path : null;
+    }
+
+    public function updateProfile(int $userId, array $data): void
+    {
+        $sql = 'UPDATE users SET first_name = :first_name, last_name = :last_name, email = :email';
+        if (isset($data['password_hash'])) {
+            $sql .= ', password_hash = :password_hash';
+        }
+        $sql .= ' WHERE id = :user_id AND status = \'active\'';
+        $stmt = Database::connection()->prepare($sql);
+        $stmt->execute([
+            'user_id' => $userId,
+            'first_name' => $data['first_name'],
+            'last_name' => $data['last_name'],
+            'email' => $data['email'],
+            ...isset($data['password_hash']) ? ['password_hash' => $data['password_hash']] : [],
+        ]);
+        if ($stmt->rowCount() === 0 && !$this->isActive($userId)) {
+            throw new RuntimeException('The active account could not be found.');
+        }
+    }
+
+    public function updateUploadedAvatar(int $userId, ?string $path): ?string
+    {
+        $connection = Database::connection();
+        $connection->beginTransaction();
+        try {
+            $stmt = $connection->prepare(
+                'SELECT profile_image_path FROM users WHERE id = :user_id AND status = \'active\' FOR UPDATE'
+            );
+            $stmt->execute(['user_id' => $userId]);
+            $previousPath = $stmt->fetchColumn();
+            if ($previousPath === false) {
+                throw new RuntimeException('The active account could not be found.');
+            }
+
+            if ($path !== null) {
+                $stmt = $connection->prepare(
+                    'UPDATE users SET profile_image_path = :path, avatar_source = \'upload\' WHERE id = :user_id'
+                );
+                $stmt->execute(['user_id' => $userId, 'path' => $path]);
+            } else {
+                $stmt = $connection->prepare(
+                    'UPDATE users SET profile_image_path = NULL,
+                        avatar_source = IF(github_id IS NULL OR github_avatar_path IS NULL, \'initials\', \'github\')
+                     WHERE id = :user_id'
+                );
+                $stmt->execute(['user_id' => $userId]);
+            }
+            $connection->commit();
+            return is_string($previousPath) ? $previousPath : null;
+        } catch (\Throwable $error) {
+            if ($connection->inTransaction()) {
+                $connection->rollBack();
+            }
+            throw $error;
+        }
+    }
+
+    public function setAvatarSource(int $userId, string $source): void
+    {
+        if (!in_array($source, ['initials', 'upload', 'github'], true)) {
+            throw new RuntimeException('Choose a valid profile photo source.');
+        }
+        $profile = $this->profileForSettings($userId);
+        if (!$profile) {
+            throw new RuntimeException('The active account could not be found.');
+        }
+        $available = match ($source) {
+            'initials' => true,
+            'upload' => $profile['profile_image_path'] !== null,
+            'github' => $profile['github_id'] !== null && $profile['github_avatar_path'] !== null,
+        };
+        if (!$available) {
+            throw new RuntimeException('That profile photo is not available.');
+        }
+        $stmt = Database::connection()->prepare(
+            'UPDATE users SET avatar_source = :source WHERE id = :user_id AND status = \'active\''
+        );
+        $stmt->execute(['user_id' => $userId, 'source' => $source]);
+    }
+
+    public function connectGithub(int $userId, int $githubId, string $githubLogin, string $avatarPath): ?string
+    {
+        $connection = Database::connection();
+        $connection->beginTransaction();
+        try {
+            $stmt = $connection->prepare(
+                'SELECT id FROM users WHERE github_id = :github_id AND id <> :user_id LIMIT 1'
+            );
+            $stmt->execute(['github_id' => $githubId, 'user_id' => $userId]);
+            if ($stmt->fetchColumn()) {
+                throw new RuntimeException('That GitHub account is already connected to another TEAMFLOW account.');
+            }
+
+            $stmt = $connection->prepare(
+                'SELECT github_avatar_path FROM users WHERE id = :user_id AND status = \'active\' FOR UPDATE'
+            );
+            $stmt->execute(['user_id' => $userId]);
+            $previousPath = $stmt->fetchColumn();
+            if ($previousPath === false) {
+                throw new RuntimeException('The active account could not be found.');
+            }
+
+            $stmt = $connection->prepare(
+                'UPDATE users SET github_id = :github_id, github_login = :github_login, github_avatar_path = :avatar_path,
+                    avatar_source = \'github\' WHERE id = :user_id'
+            );
+            $stmt->execute([
+                'user_id' => $userId,
+                'github_id' => $githubId,
+                'github_login' => $githubLogin,
+                'avatar_path' => $avatarPath,
+            ]);
+            $connection->commit();
+            return is_string($previousPath) ? $previousPath : null;
+        } catch (\Throwable $error) {
+            if ($connection->inTransaction()) {
+                $connection->rollBack();
+            }
+            throw $error;
+        }
+    }
+
+    public function disconnectGithub(int $userId): ?string
+    {
+        $connection = Database::connection();
+        $connection->beginTransaction();
+        try {
+            $stmt = $connection->prepare(
+                'SELECT github_avatar_path FROM users WHERE id = :user_id AND status = \'active\' FOR UPDATE'
+            );
+            $stmt->execute(['user_id' => $userId]);
+            $previousPath = $stmt->fetchColumn();
+            if ($previousPath === false) {
+                throw new RuntimeException('The active account could not be found.');
+            }
+
+            $stmt = $connection->prepare(
+                'UPDATE users SET github_id = NULL, github_login = NULL, github_avatar_path = NULL,
+                    avatar_source = IF(avatar_source = \'github\',
+                        IF(profile_image_path IS NULL, \'initials\', \'upload\'), avatar_source)
+                 WHERE id = :user_id'
+            );
+            $stmt->execute(['user_id' => $userId]);
+            $connection->commit();
+            return is_string($previousPath) ? $previousPath : null;
+        } catch (\Throwable $error) {
+            if ($connection->inTransaction()) {
+                $connection->rollBack();
+            }
+            throw $error;
+        }
+    }
+
     public function isAdministrator(int $userId): bool
     {
         $stmt = Database::connection()->prepare(

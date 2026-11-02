@@ -13,7 +13,7 @@
     <?php $currentPage = 'dashboard'; require BASE_PATH . '/app/Views/layouts/workspace_start.php'; ?>
     <main class="dashboard-main">
             <header class="dashboard-heading">
-                <div><p class="breadcrumb">Workspace <span>/</span> Dashboard</p><h1>Good to have you here, <?= e($name) ?>.</h1><p class="dashboard-subtitle">A clear view of your projects, tasks, and team activity.</p></div>
+                <div><h1>Good to have you here, <?= e($name) ?>.</h1><p class="dashboard-subtitle">A clear view of your projects, tasks, and team activity.</p></div>
                 <a class="button-primary dashboard-primary-action" href="<?= e(rtrim($_ENV['APP_URL'] ?? '', '/')) ?>/my-tasks">View my tasks <span>→</span></a>
             </header>
 

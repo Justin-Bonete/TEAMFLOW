@@ -7,6 +7,7 @@ A PHP/MySQL team task and project management system built with an MVC architectu
 - MySQL 8+ or MariaDB 10.6+
 - Apache with `mod_rewrite` enabled (XAMPP is supported)
 - PHP `pdo_mysql` and `fileinfo` extensions
+- PHP `curl` extension (for GitHub profile linking)
 - Composer (optional for this starter; the application currently uses native PHP)
 
 ## Local setup (XAMPP)
@@ -17,6 +18,11 @@ A PHP/MySQL team task and project management system built with an MVC architectu
 5. Visit `http://localhost/TEAMFLOW/public/`.
 
 If your folder is named differently, update `APP_URL` in `.env` and the `RewriteBase` in `public/.htaccess`.
+
+### Profile settings and GitHub avatars
+Use **Settings** in the workspace or click your profile to update your name, email, password, and profile photo. Uploaded profile images are restricted to JPEG, PNG, or WebP (up to 5 MB) and are stored privately. Changing an email address or password requires the current password.
+
+To enable GitHub avatars, create a GitHub OAuth App with the callback URL shown on the Settings page (`APP_URL/settings/github/callback`). Add its `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` to the server's `.env`. Use HTTPS for non-local installations. TEAMFLOW requests read-only profile access, links the GitHub numeric account ID to the currently signed-in TEAMFLOW account, and stores a private copy of the avatar. It does not import GitHub email addresses, repository data, or enable GitHub sign-in. Existing installations must apply `database/migrations/20261102_add_profile_settings.sql` once before serving the updated application; do not re-import `database/schema.sql` because it recreates the database tables.
 
 ## Initial administrator
 Create the first administrator using the one-time setup script:
@@ -37,10 +43,10 @@ Project pages include a Kanban board with drag-and-drop and status-control alter
 Open **Reports** from the workspace sidebar to review progress for accessible projects, task completion and overdue totals, and active team members' assigned-task performance. Administrators see all projects; other users' reports are limited to projects they belong to. Use **Export project report · CSV** to download the project-level summary.
 
 ## Security and production deployment
-Copy `.env.example` to `.env`, set a unique database password, and keep `.env` outside the web root and out of source control. Set `APP_DEBUG=false` in production and configure `APP_URL` for the public HTTPS address. Use HTTPS, a least-privilege MySQL account, current supported PHP/MySQL releases, and Apache with `mod_rewrite`; point the document root at `public/`. If TLS terminates at a reverse proxy, ensure PHP receives the HTTPS state so session cookies are marked secure. Keep `storage/` private and writable only by the application account. Configure PHP upload limits to accommodate the 10 MB attachment limit (for example, `upload_max_filesize=10M` and `post_max_size=12M`). The application sends restrictive browser security headers, uses strict session cookie settings, regenerates session IDs after sign-in, validates CSRF tokens, and enforces project access on private attachment downloads.
+Copy `.env.example` to `.env`, set a unique database password, and keep `.env` outside the web root and out of source control. Set `APP_DEBUG=false` in production and configure `APP_URL` for the public HTTPS address. Use HTTPS, a least-privilege MySQL account, current supported PHP/MySQL releases, and Apache with `mod_rewrite`; point the document root at `public/`. If TLS terminates at a reverse proxy, ensure PHP receives the HTTPS state so session cookies are marked secure. Keep `storage/` private and writable only by the application account. Configure PHP upload limits to accommodate the 10 MB attachment limit (for example, `upload_max_filesize=10M` and `post_max_size=12M`). The application sends restrictive browser security headers, uses strict session cookie settings, regenerates session IDs after sign-in, validates CSRF tokens, and enforces project access on private attachment downloads and profile photos.
 
 ### Backup and restore
-Back up both the MySQL database and `storage/uploads/` to encrypted, access-controlled storage, and regularly test restoring them to an isolated environment. For XAMPP, run the following from a protected backup directory; `--password` prompts for the database account password rather than putting it in the command:
+Back up both the MySQL database and the private `storage/uploads/` and `storage/profile-photos/` directories to encrypted, access-controlled storage, and regularly test restoring them to an isolated environment. For XAMPP, run the following from a protected backup directory; `--password` prompts for the database account password rather than putting it in the command:
 
 ```bat
 "C:\xampp\mysql\bin\mysqldump.exe" --single-transaction --routines --triggers --host=127.0.0.1 --user=teamflow_backup --password teamflow > teamflow-backup.sql

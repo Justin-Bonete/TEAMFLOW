@@ -4,8 +4,11 @@
 /vendor/
 /storage/logs/*
 /storage/uploads/*
+/storage/profile-photos/*
 !/storage/logs/.gitkeep
 !/storage/uploads/.gitkeep
 !/storage/uploads/.htaccess
+!/storage/profile-photos/.gitkeep
+!/storage/profile-photos/.htaccess
 .DS_Store
 Thumbs.db

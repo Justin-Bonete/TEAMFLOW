@@ -1,4 +1,102 @@
 (() => {
+    document.querySelectorAll('.avatar-photo').forEach((image) => {
+        image.addEventListener('error', () => image.remove(), { once: true });
+    });
+
+    const settingsDialog = document.getElementById('profile-settings-dialog');
+    const settingsContent = settingsDialog?.querySelector('[data-profile-settings-content]');
+    if (settingsDialog && settingsContent) {
+        const settingsToggles = [...document.querySelectorAll('[data-profile-settings-toggle]')];
+        const settingsClose = settingsDialog.querySelector('[data-profile-settings-close]');
+        const settingsUrl = `${document.querySelector('.app-brand')?.getAttribute('href')?.replace(/\/dashboard$/, '') ?? ''}/settings`;
+        let previousFocus = null;
+        let loadId = 0;
+
+        const setSettingsMessage = (message, isError = false) => {
+            const paragraph = document.createElement('p');
+            paragraph.className = `quick-panel-message${isError ? ' is-error' : ''}`;
+            paragraph.textContent = message;
+            settingsContent.replaceChildren(paragraph);
+            if (isError) {
+                const retry = document.createElement('button');
+                retry.className = 'button-secondary settings-retry';
+                retry.type = 'button';
+                retry.textContent = 'Try again';
+                retry.addEventListener('click', loadSettings);
+                settingsContent.append(retry);
+            }
+        };
+
+        async function loadSettings() {
+            const requestId = ++loadId;
+            setSettingsMessage('Loading your settings…');
+            try {
+                const response = await fetch(`${settingsUrl}?fragment=1`, {
+                    credentials: 'same-origin',
+                    cache: 'no-store',
+                    headers: { Accept: 'text/html' },
+                });
+                if (!response.ok) throw new Error('Your settings could not be loaded.');
+                const contentType = response.headers.get('content-type') ?? '';
+                if (!contentType.includes('text/html')) throw new Error('The settings response was unexpected.');
+                const markup = await response.text();
+                if (requestId === loadId) settingsContent.innerHTML = markup;
+            } catch {
+                if (requestId === loadId) setSettingsMessage('Your settings could not be loaded. Please try again.', true);
+            }
+        }
+
+        const openSettings = () => {
+            previousFocus = document.activeElement;
+            settingsDialog.hidden = false;
+            document.body.classList.add('profile-settings-open');
+            settingsToggles.forEach((toggle) => toggle.setAttribute('aria-expanded', 'true'));
+            settingsClose?.focus();
+            loadSettings();
+        };
+
+        const closeSettings = (restoreFocus = true) => {
+            settingsDialog.hidden = true;
+            document.body.classList.remove('profile-settings-open');
+            settingsToggles.forEach((toggle) => toggle.setAttribute('aria-expanded', 'false'));
+            loadId += 1;
+            if (restoreFocus && previousFocus instanceof HTMLElement) previousFocus.focus();
+        };
+
+        settingsToggles.forEach((toggle) => toggle.addEventListener('click', openSettings));
+        settingsClose?.addEventListener('click', () => closeSettings());
+        settingsDialog.addEventListener('click', (event) => {
+            if (event.target === settingsDialog) closeSettings();
+        });
+        settingsDialog.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                closeSettings();
+                return;
+            }
+            if (event.key !== 'Tab') return;
+            const focusable = [...settingsDialog.querySelectorAll(
+                'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+            )].filter((element) => !element.closest('[hidden]'));
+            if (!focusable.length) {
+                event.preventDefault();
+                settingsClose?.focus();
+                return;
+            }
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        });
+
+        if (new URLSearchParams(window.location.search).get('panel') === '1') openSettings();
+    }
+
     const toggles = [...document.querySelectorAll('[data-quick-panel-toggle]')];
     if (!toggles.length) return;
 
